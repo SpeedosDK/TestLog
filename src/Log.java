@@ -1,8 +1,13 @@
 import java.util.Scanner;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Log {
     public static final Scanner input = new Scanner(System.in);
     private static final HashMap<String, String> map = new HashMap<>();
+    //public static final Timer timer = new Timer();
+
 
     public static void main(String[] args)
     {
@@ -22,6 +27,7 @@ public class Log {
                     accountCreate();
                     accountLogin();
                     verification();
+                    twoFactor();
                     break;
                 case 2:
                     accountLogin();
@@ -99,11 +105,12 @@ public class Log {
         System.out.println(rand);
         int tries = 0;
         boolean verified = false;
-        while(tries < 3) {
+        while(tries < 3 && !verified) {
             int code = input.nextInt();
             if (rand == code) {
                 System.out.println("Du er blevet verificeret");
                 verified = true;
+
             } else
             {
                 tries++;
@@ -113,7 +120,35 @@ public class Log {
             {
                 System.out.println("Verifikation mislykkede");
             }
+            input.nextLine();
+
         }
+    }
+
+    public static void twoFactor()
+    {
+
+        Timer time = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                System.out.println("Skriv 2fa");
+                int twofactor = input.nextInt();
+                int rand = codeGen(9000);
+
+                if (twofactor == rand)
+                {
+                    System.out.println("Sucess");
+                }
+
+            }
+        };
+        time.schedule(task, 0, 6000);
+
+
+
     }
 
     public static int codeGen(int numberscale)
@@ -121,5 +156,8 @@ public class Log {
         int random = (int) (Math.random() * numberscale);
         return 1000 + random;
     }
+
+
+
 
 }

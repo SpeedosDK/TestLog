@@ -1,13 +1,14 @@
 import java.util.Scanner;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Log {
-    public static final Scanner input = new Scanner(System.in);
-    private static final HashMap<String, String> map = new HashMap<>();
-    //public static final Timer timer = new Timer();
 
+    private static final HashMap<String, String> map = new HashMap<>();
+    public static final ScheduledExecutorService schedueler = Executors.newScheduledThreadPool(1);
+    public static final Scanner input = new Scanner(System.in);
 
     public static void main(String[] args)
     {
@@ -45,7 +46,7 @@ public class Log {
                     repeat = true;
             }
         } while (repeat);
-        input.close();
+        //input.close();
     }
 
     public static void accountCreate()
@@ -124,33 +125,42 @@ public class Log {
 
         }
     }
-
     public static void twoFactor()
     {
+        /*
+        Problemet er her, når der gået 10 sekunder og den refresher og laver en ny kode, så får jeg den her error
+        Exception in thread "Thread-1" java.lang.IndexOutOfBoundsException: end. Har prøvet at lav en
+        try and catch men synes ikke jeg kunne få det til at virke
+         */
 
-        Timer time = new Timer();
-        TimerTask task = new TimerTask()
+
+        Runnable refreshTask = new Runnable()
         {
             @Override
             public void run()
             {
-                System.out.println("Skriv 2fa");
-                int twofactor = input.nextInt();
                 int rand = codeGen(9000);
+                System.out.println(rand);
+                System.out.println("Skriv 2fa");
 
-                if (twofactor == rand)
-                {
-                    System.out.println("Sucess");
-                }
+               new Thread(() -> {
 
+                   int twoFactor = input.nextInt();
+                    if (twoFactor == rand)
+                    {
+                        System.out.println("Rigtigt");
+                    }
+                    else
+                    {
+                        System.out.println("Forkert 2fa");
+                    }
+
+
+               }).start();
             }
         };
-        time.schedule(task, 0, 6000);
-
-
-
+        schedueler.scheduleAtFixedRate(refreshTask, 0,10, TimeUnit.SECONDS);
     }
-
     public static int codeGen(int numberscale)
     {
         int random = (int) (Math.random() * numberscale);
